@@ -42,7 +42,12 @@ app.post("/urls/:shortURL/delete",(req,res)=>{// delete a particular shortURL fr
   res.redirect("/urls");
 
 })
-app
+app.post("/urls/:shortURL/edit",(req,res)=> { //edit the long url and redirect to Myurl Page.
+  const shortURL = req.params.shortURL;
+  urlDatabase[shortURL]=req.body.longURL;
+  res.redirect("/urls");
+
+});
 // app.get("/", (req, res) => {
 //   res.send("Hello!");
 // });
