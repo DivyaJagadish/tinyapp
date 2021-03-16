@@ -35,6 +35,13 @@ app.get("/u/:shortURL", (req, res) => { // Redirect the shortURL to actual web p
   const longURL = urlDatabase [`${req.params.shortURL}`];
   res.redirect(longURL);
 });
+
+app.post("/urls/:shortURL/delete",(req,res)=>{// delete a particular shortURL from the url Database.
+  const id =req.params.shortURL;
+  delete urlDatabase[id];
+  res.redirect("/urls");
+
+})
 // app.get("/", (req, res) => {
 //   res.send("Hello!");
 // });
