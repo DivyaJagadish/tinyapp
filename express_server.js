@@ -42,6 +42,7 @@ app.post("/urls/:shortURL/delete",(req,res)=>{// delete a particular shortURL fr
   res.redirect("/urls");
 
 })
+app
 // app.get("/", (req, res) => {
 //   res.send("Hello!");
 // });
