@@ -28,6 +28,10 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`urls/${shortURL}`);         //Redirect the page to the shortURL
 });
+app.get("/u/:shortURL", (req, res) => { // Redirect the shortURL to actual web page
+  const longURL = urlDatabase [`${req.params.shortURL}`];
+  res.redirect(longURL);
+});
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
