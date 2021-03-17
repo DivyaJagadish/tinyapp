@@ -7,6 +7,19 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 app.set("view engine", "ejs");
 
+const users = { //users database
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+};
+
 let urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -64,6 +77,15 @@ app.get("/register",(req,res)=>{
   res.render("urls_register",{username: req.cookies["username"]});
 })
 
+//Register Handler for register request
+
+app.post("/register",(req,res)=>{
+  const newuserid = generateRandomString();
+  const newuser = {"id":newuserid , "email":req.body.email , "password" : req.body.password};
+  users[newuserid] = newuser;
+  res.cookie("userid",newuserid);
+  res.redirect("/urls");
+});
 
 // app.get("/", (req, res) => {
 //   res.send("Hello!");
