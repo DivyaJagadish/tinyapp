@@ -49,6 +49,10 @@ app.post("/urls/:shortURL/edit",(req,res)=> { //edit the long url and redirect t
   res.redirect("/urls");
 
 });
+app.post("/login",(req,res)=>{// login route using res.cookies
+  res.cookie("username",req.body.username);
+  res.redirect("/urls");
+});
 // app.get("/", (req, res) => {
 //   res.send("Hello!");
 // });
