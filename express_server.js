@@ -28,31 +28,14 @@ const  generateRandomString = function () { // generates random string of 6 leng
   return (Math.random().toString(36).substring(2,8));
 };
 app.get("/urls", (req, res) => {//urls page
-  let currentuser = {};
-  for (const user in users){// finding user object from  users for passing to header
-    if (user === req.cookies.userid) {
-      currentuser = users[user];
-    }
-  }
-  res.render("urls_index", {urlDatabase:urlDatabase,currentuser: currentuser});
+  res.render("urls_index", {urlDatabase:urlDatabase, user:users[req.cookies.userid]});
 });
 app.get("/urls/new", (req, res) => { // generates a form for newURL
-  let currentuser = {};
-  for (const user in users){// finding user object from  users for passing to header
-    if (user === req.cookies.userid) {
-      currentuser = users[user];
-    }
-  }
-  res.render("urls_new",{currentuser:currentuser});
+ 
+  res.render("urls_new",{user:users[req.cookies.userid]});
 });
 app.get("/urls/:shortURL", (req, res) => {// shows the page what the shortURL corresponds to
-  let currentuser = {};
-  for (const user in users){// finding user object from  users for passing to header
-    if (user === req.cookies.userid) {
-      currentuser = users[user];
-    }
-  }
-  const templateVars = { shortURL: req.params.shortURL, longURL:urlDatabase [`${req.params.shortURL}`],currentuser:currentuser};
+  const templateVars = { shortURL: req.params.shortURL, longURL:urlDatabase [`${req.params.shortURL}`],user:users[req.cookies.userid]};
   if (templateVars.longURL !== undefined){
    res.render("url_show", templateVars);
   } else 
