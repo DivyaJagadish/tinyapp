@@ -76,7 +76,7 @@ app.post("/urls/:shortURL/edit", (req, res) => { //edit the long url and redirec
 //login 
 //route for login
 app.get("/login",(req,res)=>{
-  res.render("urls_login");
+  res.render("urls_login",{ user: users[req.cookies.userid]});
 });
 app.post("/login", (req, res) => {// login route using res.cookies
   res.cookie("username", req.body.username);
@@ -90,7 +90,7 @@ app.post("/logout", (req, res) => {//logout handler
 // route for Register
 
 app.get("/register", (req, res) => {
-  res.render("urls_register");
+  res.render("urls_register",{ user: users[req.cookies.userid]});
 })
 
 //Register Handler for register request
