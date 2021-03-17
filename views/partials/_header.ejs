@@ -16,10 +16,9 @@
           <input type = "submit" value = "Logout"> </form>
           <%} else{%>
             <!--If user is  not logged in display login form-->
-        <form method = "POST" action = "/login" style ="position: absolute;right :50px">
-          <input class="form-control" type="text" name="username" placeholder="username"style="width: 300px;position: absolute; right: 100px;">
-          <input type ="submit" value ="Login"> 
-        </form>
+            <a  href="/login" style ="position :absolute;right : 150px; color :antiquewhite">Login</a>
+            <a href="/register"style ="position :absolute;right : 50px; color : antiquewhite">Register</a>
+        
         <%}%>
       </div>
     </div>
