@@ -15,13 +15,13 @@ const  generateRandomString = function () { // generates random string of 6 leng
   return (Math.random().toString(36).substring(2,8));
 };
 app.get("/urls", (req, res) => {
-  res.render("urls_index", {urlDatabase:urlDatabase});
+  res.render("urls_index", {urlDatabase:urlDatabase,username: req.cookies["username"]});
 });
 app.get("/urls/new", (req, res) => { // generates a form for newURL
-  res.render("urls_new");
+  res.render("urls_new",{username: req.cookies["username"]});
 });
 app.get("/urls/:shortURL", (req, res) => {// shows the page what the shortURL corresponds to
-  const templateVars = { shortURL: req.params.shortURL, longURL:urlDatabase [`${req.params.shortURL}`]};
+  const templateVars = { shortURL: req.params.shortURL, longURL:urlDatabase [`${req.params.shortURL}`],username: req.cookies["username"]};
   if (templateVars.longURL !== undefined){
    res.render("url_show", templateVars);
   } else 
