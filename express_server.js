@@ -58,6 +58,13 @@ app.post("/logout",(req,res)=>{
   res.clearCookie("username");
   res.redirect("/urls");
 })
+// route for Register
+
+app.get("/register",(req,res)=>{
+  res.render("urls_register",{username: req.cookies["username"]});
+})
+
+
 // app.get("/", (req, res) => {
 //   res.send("Hello!");
 // });
