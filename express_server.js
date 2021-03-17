@@ -27,6 +27,16 @@ let urlDatabase = {
 const  generateRandomString = function () { // generates random string of 6 length.
   return (Math.random().toString(36).substring(2,8));
 };
+
+const userAlreadyRegistered =function(newuseremail){//check userAlreadyregistered and returns true if not fregistered and returns false if registered.
+  for (const user in users){
+    console.log(users[user].email);
+    if(users[user].email === newuseremail) {
+    
+    return false;
+  }}
+  return true;
+}
 app.get("/urls", (req, res) => {//urls page
   res.render("urls_index", {urlDatabase:urlDatabase, user:users[req.cookies.userid]});
 });
@@ -82,10 +92,19 @@ app.get("/register",(req,res)=>{
 
 app.post("/register",(req,res)=>{
   const newuserid = generateRandomString();
-  const newuser = {"id":newuserid , "email":req.body.email , "password" : req.body.password};
-  users[newuserid] = newuser;
-  res.cookie("userid",newuserid);
-  res.redirect("/urls");
+  if(req.body.email && req.body.password) {
+    const checkemail = userAlreadyRegistered(req.body.email);// check useer already registered
+    if(checkemail) { 
+      const newuser = {"id":newuserid , "email":req.body.email , "password" : req.body.password};
+      users[newuserid] = newuser;
+      res.cookie("userid",newuserid);
+      res.redirect("/urls");
+   }else {
+    res.sendStatus(400);
+   }
+  } else{
+    res.sendStatus(400);
+  }
 });
 
 // app.get("/", (req, res) => {
