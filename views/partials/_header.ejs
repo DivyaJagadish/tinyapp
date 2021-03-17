@@ -9,9 +9,9 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         <!--checking for whether user is logged in-->
-        <%if (username) {%>
+        <%if (currentuser.id) {%>
           <!--If user is already logged in display username and logout-->
-         <class style="position: absolute; right: 150px ; top:auto " ><strong>Logged in as Tiny App User!:<%=username%></strong> </class>
+         <class style="position: absolute; right: 150px ; top:auto " ><strong>Logged in as Tiny App User!:<%=currentuser.email%></strong> </class>
          <form method="POST" action ="/logout" style ="position :absolute ;right : 50px">
           <input type = "submit" value = "Logout"> </form>
           <%} else{%>
