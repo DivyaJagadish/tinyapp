@@ -75,12 +75,31 @@ app.post("/urls/:shortURL/edit", (req, res) => { //edit the long url and redirec
 
 //login 
 //route for login
-app.get("/login",(req,res)=>{
-  res.render("urls_login",{ user: users[req.cookies.userid]});
+app.get("/login", (req, res) => {
+  res.render("urls_login", { user: users[req.cookies.userid] });
 });
+//Login Handler
 app.post("/login", (req, res) => {// login route using res.cookies
-  res.cookie("username", req.body.username);
-  res.redirect("/urls");
+  const checkemail = userAlreadyRegistered(req.body.email);
+  let passwordmatch = false;
+  let userid;
+  if (!checkemail) {
+    for (const user in users) {
+      if (users[user]["email"] === req.body.email && users[user]["password"] === req.body.password) {
+        passwordmatch = true;
+        userid = users[user]["id"];
+      }
+    }
+    if (passwordmatch) {
+      res.cookie("userid", userid);
+      res.redirect("/urls");
+    } else {
+      res.sendStatus(403);
+    }
+
+  } else {
+    res.sendStatus(403);
+  }
 });
 
 app.post("/logout", (req, res) => {//logout handler
@@ -90,7 +109,7 @@ app.post("/logout", (req, res) => {//logout handler
 // route for Register
 
 app.get("/register", (req, res) => {
-  res.render("urls_register",{ user: users[req.cookies.userid]});
+  res.render("urls_register", { user: users[req.cookies.userid] });
 })
 
 //Register Handler for register request
