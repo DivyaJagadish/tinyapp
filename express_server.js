@@ -1,4 +1,5 @@
 const express = require("express");
+const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 8080;//default port
 const bodyParser = require("body-parser"); // miidleware
@@ -10,17 +11,17 @@ app.set("view engine", "ejs");
 let users = { //users database
   "abxcdf": {
     id: "abxcdf",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    email: 'user@example.com',
+    password: '$2b$10$4L816sgoOqvQRAWM8dzKEeXXu/h6BxNwP3VznBPN0Zn6DIOCzdOXC'
   },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
+  "546pk6": {
+    id: '546pk6',
+    email: 'user1@example.com',
+    password: '$2b$10$Gp2YgGqqsG2lSr.hmn6HJ.5S58neKLMk1MKleBZfeiI3BvVYBo5xG'
+  },
 };
 
-let urlDatabase = {
+let urlDatabase = { //Database of URLs
   "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userId: "abxcdf" },
   "9sm5xK": { longURL: "http://www.google.com", userId: "abxcdf" }
 };
@@ -76,11 +77,11 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = newShortURl;
   res.redirect(`urls/${shortURL}`);         //Redirect the page to the shortURL
 });
-app.get("/u/:shortURL", (req, res) => { // Redirect the shortURL to actual web page
+app.get("/u/:shortURL", (req, res) => { // Redirect the shortURL to actual web page on clicking it.
   const longURL = urlDatabase[`${req.params.shortURL}`]["longURL"];
   res.redirect(longURL);
 });
-
+///// Delete Handler
 app.post("/urls/:shortURL/delete", (req, res) => {// delete a particular shortURL from the url Database only users who created can do that 
   const userurls = urlsForUser(req.cookies.userid);
   if (userurls[`${req.params.shortURL}`]) {// can delete only urls created by user
@@ -88,8 +89,9 @@ app.post("/urls/:shortURL/delete", (req, res) => {// delete a particular shortUR
     delete urlDatabase[id];
   }
   res.redirect("/urls");
+});
 
-})
+////EDIT Handler
 app.post("/urls/:shortURL/edit", (req, res) => { //edit the long url and redirect to Myurl Page.
   const userurls = urlsForUser(req.cookies.userid);
   if (userurls[`${req.params.shortURL}`]) {//can edit only url created by user
@@ -108,12 +110,11 @@ app.get("/login", (req, res) => {
 //Login Handler
 app.post("/login", (req, res) => {// login route using res.cookies
   const checkemail = userAlreadyRegistered(req.body.email);
-  let passwordmatch = false;
-  let userid;
+  let userid, passwordmatch;
   if (!checkemail) {
     for (const user in users) {
-      if (users[user]["email"] === req.body.email && users[user]["password"] === req.body.password) {
-        passwordmatch = true;
+      if (users[user]["email"] === req.body.email){
+       passwordmatch = bcrypt.compareSync(req.body.password,users[user]["password"]);// check whether entered password matches the actual saved password  
         userid = users[user]["id"];
       }
     }
@@ -123,7 +124,6 @@ app.post("/login", (req, res) => {// login route using res.cookies
     } else {
       res.sendStatus(403);
     }
-
   } else {
     res.sendStatus(403);
   }
@@ -146,7 +146,8 @@ app.post("/register", (req, res) => {
   if (req.body.email && req.body.password) {
     const checkemail = userAlreadyRegistered(req.body.email);// check useer already registered
     if (checkemail) {
-      const newuser = { "id": newuserid, "email": req.body.email, "password": req.body.password };
+      const hashedPassword = bcrypt.hashSync(req.body.password, 10);//hashing the password.
+      const newuser = { "id": newuserid, "email": req.body.email, "password": hashedPassword }
       users[newuserid] = newuser;
       res.cookie("userid", newuserid);
       res.redirect("/urls");
