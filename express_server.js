@@ -94,8 +94,8 @@ app.post("/urls/:shortURL/edit", (req, res) => { //edit the long url and redirec
   if(userurls[`${req.params.shortURL}`]) {//can edit only url created by user
   const shortURL = req.params.shortURL;
   urlDatabase[shortURL]["longURL"] = req.body.longURL;
-  res.redirect("/urls");
   }
+  res.redirect("/urls");
 
 });
 
