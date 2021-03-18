@@ -35,13 +35,13 @@ const generateRandomString = function () { // generates random string of 6 lengt
   return (Math.random().toString(36).substring(2, 8));
 };
 
-const userAlreadyRegistered = function (newuseremail) {//check userAlreadyregistered and returns true if not fregistered and returns false if registered.
+const userAlreadyRegistered = function (email) {//check userAlreadyregistered and returns true if not fregistered and returns false if registered.
   for (const user in users) {
-    if (users[user].email === newuseremail) {
-      return false;
+    if (users[user].email === email) {
+      return users[user];
     }
   }
-  return true;
+  return null;
 }
 const urlsForUser = function (id) {// Filters the user generated URLs on the basis of id and then sends them back
   const userurls = {};
@@ -115,15 +115,11 @@ app.get("/login", (req, res) => {
 });
 //Login Handler
 app.post("/login", (req, res) => {// login route using res.cookies
-  const checkemail = userAlreadyRegistered(req.body.email);
+  const user = userAlreadyRegistered(req.body.email);
   let userid, passwordmatch;
-  if (!checkemail) {
-    for (const user in users) {
-      if (users[user]["email"] === req.body.email){
-       passwordmatch = bcrypt.compareSync(req.body.password,users[user]["password"]);// check whether entered password matches the actual saved password  
-        userid = users[user]["id"];
-      }
-    }
+  if (user) {
+       passwordmatch = bcrypt.compareSync(req.body.password,user["password"]);// check whether entered password matches the actual saved password  
+        userid = user["id"];
     if (passwordmatch) {
       req.session.userid = userid
       res.redirect("/urls");
@@ -150,8 +146,8 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const newuserid = generateRandomString();
   if (req.body.email && req.body.password) {
-    const checkemail = userAlreadyRegistered(req.body.email);// check useer already registered
-    if (checkemail) {
+    const user = userAlreadyRegistered(req.body.email);// check useer already registered
+    if (!user) {
       const hashedPassword = bcrypt.hashSync(req.body.password, 10);//hashing the password.
       const newuser = { "id": newuserid, "email": req.body.email, "password": hashedPassword }
       users[newuserid] = newuser;
