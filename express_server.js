@@ -35,7 +35,7 @@ const generateRandomString = function () { // generates random string of 6 lengt
   return (Math.random().toString(36).substring(2, 8));
 };
 
-const userAlreadyRegistered = function (email) {//check userAlreadyregistered and returns true if not fregistered and returns false if registered.
+const userAlreadyRegistered = function (email, users) {//check userAlreadyregistered and returns true if not fregistered and returns false if registered.
   for (const user in users) {
     if (users[user].email === email) {
       return users[user];
@@ -115,7 +115,7 @@ app.get("/login", (req, res) => {
 });
 //Login Handler
 app.post("/login", (req, res) => {// login route using res.cookies
-  const user = userAlreadyRegistered(req.body.email);
+  const user = userAlreadyRegistered(req.body.email,users);
   let userid, passwordmatch;
   if (user) {
        passwordmatch = bcrypt.compareSync(req.body.password,user["password"]);// check whether entered password matches the actual saved password  
@@ -146,7 +146,7 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const newuserid = generateRandomString();
   if (req.body.email && req.body.password) {
-    const user = userAlreadyRegistered(req.body.email);// check useer already registered
+    const user = userAlreadyRegistered(req.body.email,users);// check useer already registered
     if (!user) {
       const hashedPassword = bcrypt.hashSync(req.body.password, 10);//hashing the password.
       const newuser = { "id": newuserid, "email": req.body.email, "password": hashedPassword }
