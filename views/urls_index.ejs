@@ -11,7 +11,8 @@
 <body>
 
   <%- include('partials/_header') %> 
-  <main style="margin: 1em;">
+  <% if(user) { %><!--checking whether user is logged in-->
+    <main style="margin: 1em;">
     <h3>My URLs</h3>
     <table class="table">
       <thead>
@@ -35,6 +36,10 @@
             </form></td>
           </tr>
         <% } %>
+        <%} else {%>
+          <h2 ><strong>Login if Already a user </strong></h2> <!---displays to the user if you are not registered-->
+          <h2><strong>or Register  if New User for Access...</strong></h2>
+        <%}%>
       </tbody>
     </table>
   </main>
