@@ -101,8 +101,8 @@ app.post("/login", (req, res) => {// login route using res.cookies
     res.sendStatus(403);
   }
 });
-
-app.post("/logout", (req, res) => {//logout handler
+//logout handler
+app.post("/logout", (req, res) => {
   res.clearCookie("userid");
   res.redirect("/urls");
 })
