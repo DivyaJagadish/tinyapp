@@ -1,17 +1,17 @@
 const express = require("express");
 const bcrypt = require('bcrypt');
+const userAlreadyRegistered  = require("./helpers.js");
 var cookieSession = require('cookie-session')
 const app = express();
 const PORT = 8080;//default port
 const bodyParser = require("body-parser"); // miidleware
-// const cookieParser = require("cookie-parser");//middleware cookie parser
+
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cookieSession({
   name: 'TinyApp',
   keys: ["hello" ,"world"]
 }))
-// app.use(cookieParser());
 app.set("view engine", "ejs");
 
 let users = { //users database
@@ -35,14 +35,7 @@ const generateRandomString = function () { // generates random string of 6 lengt
   return (Math.random().toString(36).substring(2, 8));
 };
 
-const userAlreadyRegistered = function (email, users) {//check userAlreadyregistered and returns true if not fregistered and returns false if registered.
-  for (const user in users) {
-    if (users[user].email === email) {
-      return users[user];
-    }
-  }
-  return null;
-}
+
 const urlsForUser = function (id) {// Filters the user generated URLs on the basis of id and then sends them back
   const userurls = {};
   for (const url in urlDatabase) {
@@ -51,8 +44,16 @@ const urlsForUser = function (id) {// Filters the user generated URLs on the bas
     }
   }
   return userurls;
-
 }
+// Home 
+ app.get("/", (req, res) => {
+ if(req.session.userid) {
+   res.redirect("/urls");
+ } else {
+   res.redirect("/login");
+ }
+});
+
 
 app.get("/urls", (req, res) => {//urls page displays msg to if not logged in otherwise displays the urls ;
   const userurls = urlsForUser(req.session.userid);
@@ -111,7 +112,11 @@ app.post("/urls/:shortURL/edit", (req, res) => { //edit the long url and redirec
 //login 
 //route for login
 app.get("/login", (req, res) => {
-  res.render("urls_login", { user: users[req.session.userid] });
+  if(req.session.userid) {
+  res.redirect("/urls");
+  } else {
+    res.render("urls_login", { user: users[req.session.userid] });
+  }
 });
 //Login Handler
 app.post("/login", (req, res) => {// login route using res.cookies
@@ -124,10 +129,10 @@ app.post("/login", (req, res) => {// login route using res.cookies
       req.session.userid = userid
       res.redirect("/urls");
     } else {
-      res.sendStatus(403);
+      res.status(403).send("Password don't match");
     }
   } else {
-    res.sendStatus(403);
+    res.status(403).send("User not exist.Please Register to continue");
   }
 });
 //logout handler
@@ -138,7 +143,11 @@ app.post("/logout", (req, res) => {
 // route for Register
 
 app.get("/register", (req, res) => {
-  res.render("urls_register", { user: users[req.session.userid] });
+  if(req.session.userid) {
+    res.redirect("/urls");
+    } else {
+   res.render("urls_register", { user: users[req.session.userid] });
+    }
 })
 
 //Register Handler for register request
@@ -154,16 +163,14 @@ app.post("/register", (req, res) => {
       req.session.userid =  newuserid;
       res.redirect("/urls");
     } else {
-      res.sendStatus(400);
+      res.status(400).send("User already Registered!Please login");
     }
   } else {
-    res.sendStatus(400);
+    res.status(400).send("Email-id and Password required !");
   }
 });
 
-// app.get("/", (req, res) => {
-//   res.send("Hello!");
-// });
+
 // app.get("/urls.json", (req, res) => {
 //   res.json(urlDatabase);
 // });
