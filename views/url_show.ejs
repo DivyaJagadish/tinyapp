@@ -8,7 +8,8 @@
 
 <body>
   <%- include('partials/_header') %> 
-  <%if(user) {%> <!--CHECKS WHETHER USER IS LOGGED IN-->
+  <%if(user) {%> <!--Checks whether user is logged in-->
+  <%if (longURL) { %> <!--checks whether-->
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
@@ -27,6 +28,9 @@
       </form>
     </div>
     <div class="card-footer text-muted"></div>
+    <% } else {%>
+      <h2> You doesn't own this shortURL ....</h2>
+      <% }%>
     <%} else {%>
       <h3>Please Login if Already a user or  else Register as a New User for Access</h3>
       <%}%>

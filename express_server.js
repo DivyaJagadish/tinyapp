@@ -48,7 +48,6 @@ const urlsForUser = function(id){// Filters the user generated URLs on the basis
 
 app.get("/urls", (req, res) => {//urls page displays msg to if not logged in otherwise displays the urls ;
  const userurls= urlsForUser(req.cookies.userid);
-  console.log(userurls);
   res.render("urls_index", { userurls: userurls, user: users[req.cookies.userid] });//sends only user generated urls.
 });
 app.get("/urls/new", (req, res) => { // generates a form for newURL+*-
@@ -59,10 +58,15 @@ app.get("/urls/new", (req, res) => { // generates a form for newURL+*-
   res.redirect("/login");
 });
 
-app.get("/urls/:shortURL", (req, res) => {// shows the page what the shortURL corresponds to shorturl 
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[`${req.params.shortURL}`]["longURL"], user: users[req.cookies.userid] };
+app.get("/urls/:shortURL", (req, res) => {// shows the page what the shortURL corresponds to shorturl  if user logged in otherwise prompt to login or messages that they don't own the url.
+  const userurls= urlsForUser(req.cookies.userid)
+  if(urlsForUser[`${req.params.shortURL}`]) {
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlsForUser[`${req.params.shortURL}`]["longURL"], user: users[req.cookies.userid] };
     res.render("url_show", templateVars);
-
+  }else {
+    const templateVars = { shortURL: req.params.shortURL, longURL: undefined, user: users[req.cookies.userid] };
+    res.render("url_show", templateVars);
+  }
 });
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
@@ -75,7 +79,7 @@ app.get("/u/:shortURL", (req, res) => { // Redirect the shortURL to actual web p
   res.redirect(longURL);
 });
 
-app.post("/urls/:shortURL/delete", (req, res) => {// delete a particular shortURL from the url Database.
+app.post("/urls/:shortURL/delete", (req, res) => {// delete a particular shortURL from the url Database only 
   const id = req.params.shortURL;
   delete urlDatabase[id];
   res.redirect("/urls");
