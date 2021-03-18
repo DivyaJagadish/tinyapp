@@ -60,8 +60,9 @@ app.get("/urls/new", (req, res) => { // generates a form for newURL+*-
 
 app.get("/urls/:shortURL", (req, res) => {// shows the page what the shortURL corresponds to shorturl  if user logged in otherwise prompt to login or messages that they don't own the url.
   const userurls= urlsForUser(req.cookies.userid)
-  if(urlsForUser[`${req.params.shortURL}`]) {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlsForUser[`${req.params.shortURL}`]["longURL"], user: users[req.cookies.userid] };
+ 
+  if(userurls[`${req.params.shortURL}`]) {
+  const templateVars = { shortURL: req.params.shortURL, longURL: userurls[`${req.params.shortURL}`]["longURL"], user: users[req.cookies.userid] };
     res.render("url_show", templateVars);
   }else {
     const templateVars = { shortURL: req.params.shortURL, longURL: undefined, user: users[req.cookies.userid] };
@@ -70,8 +71,8 @@ app.get("/urls/:shortURL", (req, res) => {// shows the page what the shortURL co
 });
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  urlDatabase[shortURL]["longURL"] = req.body.longURL;
-  urlDatabase[shortURL]["userId"] = req.cookies.userid;
+  let newShortURl= {longURL :req.body.longURL, userId : req.cookies.userid};
+  urlDatabase[shortURL] = newShortURl;
   res.redirect(`urls/${shortURL}`);         //Redirect the page to the shortURL
 });
 app.get("/u/:shortURL", (req, res) => { // Redirect the shortURL to actual web page
@@ -79,16 +80,22 @@ app.get("/u/:shortURL", (req, res) => { // Redirect the shortURL to actual web p
   res.redirect(longURL);
 });
 
-app.post("/urls/:shortURL/delete", (req, res) => {// delete a particular shortURL from the url Database only 
+app.post("/urls/:shortURL/delete", (req, res) => {// delete a particular shortURL from the url Database only users who created can do that 
+  const userurls = urlsForUser(req.cookies.userid);
+  if(userurls[`${req.params.shortURL}`]) {// can delete only urls created by user
   const id = req.params.shortURL;
   delete urlDatabase[id];
+  }
   res.redirect("/urls");
 
 })
 app.post("/urls/:shortURL/edit", (req, res) => { //edit the long url and redirect to Myurl Page.
+  const userurls = urlsForUser(req.cookies.userid);
+  if(userurls[`${req.params.shortURL}`]) {//can edit only url created by user
   const shortURL = req.params.shortURL;
   urlDatabase[shortURL]["longURL"] = req.body.longURL;
   res.redirect("/urls");
+  }
 
 });
 
