@@ -8,7 +8,7 @@ app.use(cookieParser());
 app.set("view engine", "ejs");
 
 let users = { //users database
-  "userRandomID": {
+  "abxcdf": {
     id: "userRandomID",
     email: "user@example.com",
     password: "purple-monkey-dinosaur"
@@ -21,8 +21,8 @@ let users = { //users database
 };
 
 let urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {longURL:"http://www.lighthouselabs.ca", userId : "abxcdf"},
+  "9sm5xK": {longURL:"http://www.google.com" , userId: "abxcdf"}
 };
 const generateRandomString = function () { // generates random string of 6 length.
   return (Math.random().toString(36).substring(2, 8));
@@ -40,7 +40,7 @@ app.get("/urls", (req, res) => {//urls page
   res.render("urls_index", { urlDatabase: urlDatabase, user: users[req.cookies.userid] });
 });
 app.get("/urls/new", (req, res) => { // generates a form for newURL+*-
-  const userId = req.cookies.userid;
+  const userId = req.cookies.userid;// checks whether user is logged in or not Only registered users can create url 
   if(userId !== undefined){
   res.render("urls_new", { user: users[req.cookies.userid] });
   } else 
@@ -48,7 +48,7 @@ app.get("/urls/new", (req, res) => { // generates a form for newURL+*-
 });
 
 app.get("/urls/:shortURL", (req, res) => {// shows the page what the shortURL corresponds to
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[`${req.params.shortURL}`], user: users[req.cookies.userid] };
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[`${req.params.shortURL}`]["longURL"], user: users[req.cookies.userid] };
   if (templateVars.longURL !== undefined) {
     res.render("url_show", templateVars);
   } else
@@ -56,11 +56,11 @@ app.get("/urls/:shortURL", (req, res) => {// shows the page what the shortURL co
 });
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
+  urlDatabase[shortURL]["longURL"] = req.body.longURL;
   res.redirect(`urls/${shortURL}`);         //Redirect the page to the shortURL
 });
 app.get("/u/:shortURL", (req, res) => { // Redirect the shortURL to actual web page
-  const longURL = urlDatabase[`${req.params.shortURL}`];
+  const longURL = urlDatabase[`${req.params.shortURL}`]["longURL"];
   res.redirect(longURL);
 });
 
@@ -72,7 +72,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {// delete a particular shortUR
 })
 app.post("/urls/:shortURL/edit", (req, res) => { //edit the long url and redirect to Myurl Page.
   const shortURL = req.params.shortURL;
-  urlDatabase[shortURL] = req.body.longURL;
+  urlDatabase[shortURL]["longURL"] = req.body.longURL;
   res.redirect("/urls");
 
 });
