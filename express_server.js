@@ -39,10 +39,14 @@ const userAlreadyRegistered = function (newuseremail) {//check userAlreadyregist
 app.get("/urls", (req, res) => {//urls page
   res.render("urls_index", { urlDatabase: urlDatabase, user: users[req.cookies.userid] });
 });
-app.get("/urls/new", (req, res) => { // generates a form for newURL
-
+app.get("/urls/new", (req, res) => { // generates a form for newURL+*-
+  const userId = req.cookies.userid;
+  if(userId !== undefined){
   res.render("urls_new", { user: users[req.cookies.userid] });
+  } else 
+  res.redirect("/login");
 });
+
 app.get("/urls/:shortURL", (req, res) => {// shows the page what the shortURL corresponds to
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[`${req.params.shortURL}`], user: users[req.cookies.userid] };
   if (templateVars.longURL !== undefined) {
