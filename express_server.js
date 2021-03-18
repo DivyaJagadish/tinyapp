@@ -9,7 +9,7 @@ app.set("view engine", "ejs");
 
 let users = { //users database
   "abxcdf": {
-    id: "userRandomID",
+    id: "abxcdf",
     email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
@@ -36,8 +36,20 @@ const userAlreadyRegistered = function (newuseremail) {//check userAlreadyregist
   }
   return true;
 }
-app.get("/urls", (req, res) => {//urls page
-  res.render("urls_index", { urlDatabase: urlDatabase, user: users[req.cookies.userid] });
+const urlsForUser = function(id){// Filters the user generated URLs on the basis of id and then sends them back
+  const userurls ={};
+  for (const url in urlDatabase) {
+  if(urlDatabase[url]["userId"]=== id) {
+  userurls[url] =urlDatabase[url];
+  }}
+  return userurls;
+
+}
+
+app.get("/urls", (req, res) => {//urls page displays msg to if not logged in otherwise displays the urls ;
+ const userurls= urlsForUser(req.cookies.userid);
+  console.log(userurls);
+  res.render("urls_index", { userurls: userurls, user: users[req.cookies.userid] });//sends only user generated urls.
 });
 app.get("/urls/new", (req, res) => { // generates a form for newURL+*-
   const userId = req.cookies.userid;// checks whether user is logged in or not Only registered users can create url 
@@ -47,16 +59,15 @@ app.get("/urls/new", (req, res) => { // generates a form for newURL+*-
   res.redirect("/login");
 });
 
-app.get("/urls/:shortURL", (req, res) => {// shows the page what the shortURL corresponds to
+app.get("/urls/:shortURL", (req, res) => {// shows the page what the shortURL corresponds to shorturl 
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[`${req.params.shortURL}`]["longURL"], user: users[req.cookies.userid] };
-  if (templateVars.longURL !== undefined) {
     res.render("url_show", templateVars);
-  } else
-    res.sendStatus(404);
+
 });
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
   urlDatabase[shortURL]["longURL"] = req.body.longURL;
+  urlDatabase[shortURL]["userId"] = req.cookies.userid;
   res.redirect(`urls/${shortURL}`);         //Redirect the page to the shortURL
 });
 app.get("/u/:shortURL", (req, res) => { // Redirect the shortURL to actual web page
