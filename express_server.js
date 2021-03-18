@@ -1,11 +1,17 @@
 const express = require("express");
 const bcrypt = require('bcrypt');
+var cookieSession = require('cookie-session')
 const app = express();
 const PORT = 8080;//default port
 const bodyParser = require("body-parser"); // miidleware
-const cookieParser = require("cookie-parser");//middleware cookie parser
+// const cookieParser = require("cookie-parser");//middleware cookie parser
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser());
+
+app.use(cookieSession({
+  name: 'TinyApp',
+  keys: ["hello" ,"world"]
+}))
+// app.use(cookieParser());
 app.set("view engine", "ejs");
 
 let users = { //users database
@@ -22,8 +28,8 @@ let users = { //users database
 };
 
 let urlDatabase = { //Database of URLs
-  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userId: "abxcdf" },
-  "9sm5xK": { longURL: "http://www.google.com", userId: "abxcdf" }
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userid: "abxcdf" },
+  "9sm5xK": { longURL: "http://www.google.com", userid: "abxcdf" }
 };
 const generateRandomString = function () { // generates random string of 6 length.
   return (Math.random().toString(36).substring(2, 8));
@@ -40,7 +46,7 @@ const userAlreadyRegistered = function (newuseremail) {//check userAlreadyregist
 const urlsForUser = function (id) {// Filters the user generated URLs on the basis of id and then sends them back
   const userurls = {};
   for (const url in urlDatabase) {
-    if (urlDatabase[url]["userId"] === id) {
+    if (urlDatabase[url]["userid"] === id) {
       userurls[url] = urlDatabase[url];
     }
   }
@@ -49,31 +55,31 @@ const urlsForUser = function (id) {// Filters the user generated URLs on the bas
 }
 
 app.get("/urls", (req, res) => {//urls page displays msg to if not logged in otherwise displays the urls ;
-  const userurls = urlsForUser(req.cookies.userid);
-  res.render("urls_index", { userurls: userurls, user: users[req.cookies.userid] });//sends only user generated urls.
+  const userurls = urlsForUser(req.session.userid);
+  res.render("urls_index", { userurls: userurls, user: users[req.session.userid] });//sends only user generated urls.
 });
 app.get("/urls/new", (req, res) => { // generates a form for newURL+*-
-  const userId = req.cookies.userid;// checks whether user is logged in or not Only registered users can create url 
-  if (userId !== undefined) {
-    res.render("urls_new", { user: users[req.cookies.userid] });
+  const userid = req.session.userid;// checks whether user is logged in or not Only registered users can create url 
+  if (userid !== undefined) {
+    res.render("urls_new", { user: users[req.session.userid] });
   } else
     res.redirect("/login");
 });
 
 app.get("/urls/:shortURL", (req, res) => {// shows the page what the shortURL corresponds to shorturl  if user logged in otherwise prompt to login or messages that they don't own the url.
-  const userurls = urlsForUser(req.cookies.userid)
+  const userurls = urlsForUser(req.session.userid)
 
   if (userurls[`${req.params.shortURL}`]) {
-    const templateVars = { shortURL: req.params.shortURL, longURL: userurls[`${req.params.shortURL}`]["longURL"], user: users[req.cookies.userid] };
+    const templateVars = { shortURL: req.params.shortURL, longURL: userurls[`${req.params.shortURL}`]["longURL"], user: users[req.session.userid] };
     res.render("url_show", templateVars);
   } else {
-    const templateVars = { shortURL: req.params.shortURL, longURL: undefined, user: users[req.cookies.userid] };
+    const templateVars = { shortURL: req.params.shortURL, longURL: undefined, user: users[req.session.userid] };
     res.render("url_show", templateVars);
   }
 });
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  let newShortURl = { longURL: req.body.longURL, userId: req.cookies.userid };
+  let newShortURl = { longURL: req.body.longURL, userid: req.session.userid };
   urlDatabase[shortURL] = newShortURl;
   res.redirect(`urls/${shortURL}`);         //Redirect the page to the shortURL
 });
@@ -83,7 +89,7 @@ app.get("/u/:shortURL", (req, res) => { // Redirect the shortURL to actual web p
 });
 ///// Delete Handler
 app.post("/urls/:shortURL/delete", (req, res) => {// delete a particular shortURL from the url Database only users who created can do that 
-  const userurls = urlsForUser(req.cookies.userid);
+  const userurls = urlsForUser(req.session.userid);
   if (userurls[`${req.params.shortURL}`]) {// can delete only urls created by user
     const id = req.params.shortURL;
     delete urlDatabase[id];
@@ -93,7 +99,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {// delete a particular shortUR
 
 ////EDIT Handler
 app.post("/urls/:shortURL/edit", (req, res) => { //edit the long url and redirect to Myurl Page.
-  const userurls = urlsForUser(req.cookies.userid);
+  const userurls = urlsForUser(req.session.userid);
   if (userurls[`${req.params.shortURL}`]) {//can edit only url created by user
     const shortURL = req.params.shortURL;
     urlDatabase[shortURL]["longURL"] = req.body.longURL;
@@ -105,7 +111,7 @@ app.post("/urls/:shortURL/edit", (req, res) => { //edit the long url and redirec
 //login 
 //route for login
 app.get("/login", (req, res) => {
-  res.render("urls_login", { user: users[req.cookies.userid] });
+  res.render("urls_login", { user: users[req.session.userid] });
 });
 //Login Handler
 app.post("/login", (req, res) => {// login route using res.cookies
@@ -119,7 +125,7 @@ app.post("/login", (req, res) => {// login route using res.cookies
       }
     }
     if (passwordmatch) {
-      res.cookie("userid", userid);
+      req.session.userid = userid
       res.redirect("/urls");
     } else {
       res.sendStatus(403);
@@ -130,13 +136,13 @@ app.post("/login", (req, res) => {// login route using res.cookies
 });
 //logout handler
 app.post("/logout", (req, res) => {
-  res.clearCookie("userid");
+  req.session = null;
   res.redirect("/urls");
 })
 // route for Register
 
 app.get("/register", (req, res) => {
-  res.render("urls_register", { user: users[req.cookies.userid] });
+  res.render("urls_register", { user: users[req.session.userid] });
 })
 
 //Register Handler for register request
@@ -149,7 +155,7 @@ app.post("/register", (req, res) => {
       const hashedPassword = bcrypt.hashSync(req.body.password, 10);//hashing the password.
       const newuser = { "id": newuserid, "email": req.body.email, "password": hashedPassword }
       users[newuserid] = newuser;
-      res.cookie("userid", newuserid);
+      req.session.userid =  newuserid;
       res.redirect("/urls");
     } else {
       res.sendStatus(400);
