@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieSession({
   name: 'TinyApp',
   keys: ["hello", "world"]
-}))
+}));
 app.set("view engine", "ejs");
 
 //// databases
